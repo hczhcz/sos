@@ -5,22 +5,12 @@ var io = require('socket.io-client');
 
 var isocket = io('http://127.0.0.1:2345');
 
+console.log('socket.io connect');
+
 var netsock = {};
 
-isocket.on('data', function (data) {
-    netsock[data.id | 0].write(data.buffer);
-});
-
-isocket.on('end', function (data) {
-    netsock[data.id | 0].end();
-});
-
-isocket.on('close', function (data) {
-    delete netsock[data.id | 0];
-});
-
 var server = socks.createServer(function (info, accept, deny) {
-    console.log('accept ' + info.dstAddr + ':' + info.dstPort);
+    console.log('socks5 open ' + info.dstAddr + ':' + info.dstPort);
     if (
         info.srcAddr !== '127.0.0.1'
         && info.srcAddr !== '::ffff:127.0.0.1'
@@ -32,7 +22,7 @@ var server = socks.createServer(function (info, accept, deny) {
     var id = Math.random() * 1048576 | 0;
     var nsocket = netsock[id] = accept(true);
 
-    isocket.emit('begin', {
+    isocket.emit('open', {
         id: id,
         host: info.dstAddr,
         port: info.dstPort,
@@ -56,6 +46,22 @@ var server = socks.createServer(function (info, accept, deny) {
             id: id,
         });
     });
+});
+
+isocket.on('data', function (data) {
+    netsock[data.id | 0].write(data.buffer);
+});
+
+isocket.on('end', function (data) {
+    netsock[data.id | 0].end();
+});
+
+isocket.on('close', function (data) {
+    delete netsock[data.id | 0];
+});
+
+isocket.on('disconnect', function () {
+    console.log('socket.io disconnect');
 });
 
 server.listen(2333, 'localhost', function () {

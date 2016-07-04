@@ -5,7 +5,7 @@ var http = require('http');
 var io = require('socket.io');
 
 var server = http.createServer(function (req, res) {
-    console.log('http connect ' + req.connection.remoteAddress);
+    console.log('http ' + req.connection.remoteAddress);
 });
 
 server.listen(2345);
@@ -15,8 +15,8 @@ io(server).on('connect', function (isocket) {
 
     var netsock = {};
 
-    isocket.on('begin', function (data) {
-        console.log('accept ' + data.host + ':' + data.port);
+    isocket.on('open', function (data) {
+        console.log('socks5 open ' + data.host + ':' + data.port);
 
         var id = data.id | 0;
         var nsocket = netsock[id] = new net.Socket();
