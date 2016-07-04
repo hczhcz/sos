@@ -1,8 +1,13 @@
 'use strict';
 
+var domain = require('domain');
 var net = require('net');
 var http = require('http');
 var io = require('socket.io');
+
+process.on('uncaughtException', function (err) {
+    console.log(err);
+});
 
 var server = http.createServer(function (req, res) {
     console.log('http ' + req.connection.remoteAddress);
@@ -21,41 +26,58 @@ io(server).on('connect', function (isocket) {
         var id = data.id | 0;
         var nsocket = netsock[id] = new net.Socket();
 
-        nsocket.connect({
-            host: data.host,
-            port: data.port,
+        var d = domain.create();
+        d.on('error', function (err) {
+            console.log(err);
+
+            delete netsock[id];
+            d.dispose();
         });
 
-        nsocket.on('data', function (buffer) {
-            isocket.emit('data', {
-                id: id,
-                buffer: buffer,
+        d.add(nsocket);
+        d.run(function () {
+            nsocket.connect({
+                host: data.host,
+                port: data.port,
             });
-        });
 
-        nsocket.on('end', function () {
-            isocket.emit('end', {
-                id: id,
+            nsocket.on('data', function (buffer) {
+                isocket.emit('data', {
+                    id: id,
+                    buffer: buffer,
+                });
             });
-        });
 
-        nsocket.on('close', function () {
-            isocket.emit('close', {
-                id: id,
+            nsocket.on('end', function () {
+                isocket.emit('end', {
+                    id: id,
+                });
+            });
+
+            nsocket.on('close', function () {
+                isocket.emit('close', {
+                    id: id,
+                });
             });
         });
     });
 
     isocket.on('data', function (data) {
-        netsock[data.id | 0].write(data.buffer);
+        if (netsock[data.id | 0]) {
+            netsock[data.id | 0].write(data.buffer);
+        }
     });
 
     isocket.on('end', function (data) {
-        netsock[data.id | 0].end();
+        if (netsock[data.id | 0]) {
+            netsock[data.id | 0].end();
+        }
     });
 
     isocket.on('close', function (data) {
-        delete netsock[data.id | 0];
+        if (netsock[data.id | 0]) {
+            delete netsock[data.id | 0];
+        }
     });
 
     isocket.on('disconnect', function () {
