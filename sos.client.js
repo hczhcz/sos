@@ -8,9 +8,7 @@ process.on('uncaughtException', function (err) {
     console.log(err);
 });
 
-var isocket = io('http://127.0.0.1:2345');
-
-console.log('socket.io connect');
+var isocket = io.connect(process.argv[3]);
 
 var netsock = {};
 
@@ -64,6 +62,10 @@ var server = socks.createServer(function (info, accept, deny) {
     });
 });
 
+isocket.on('connect', function () {
+    console.log('socket.io connect');
+});
+
 isocket.on('data', function (data) {
     if (netsock[data.id | 0]) {
         netsock[data.id | 0].write(data.buffer);
@@ -86,7 +88,7 @@ isocket.on('disconnect', function () {
     console.log('socket.io disconnect');
 });
 
-server.listen(2333, 'localhost', function () {
+server.listen(parseInt(process.argv[2], 10), 'localhost', function () {
     //
 });
 

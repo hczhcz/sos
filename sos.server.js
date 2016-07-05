@@ -13,7 +13,7 @@ var server = http.createServer(function (req, res) {
     console.log('http ' + req.connection.remoteAddress);
 });
 
-server.listen(2345);
+server.listen(parseInt(process.argv[2], 10));
 
 io(server).on('connect', function (isocket) {
     console.log('socket.io connect ' + isocket.conn.remoteAddress);
