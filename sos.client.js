@@ -8,9 +8,9 @@ process.on('uncaughtException', function (err) {
     console.log(err);
 });
 
-var isocket = io.connect(process.argv[3]);
-
 var netsock = {};
+
+var isocket = io.connect(process.argv[3]);
 
 var server = socks.createServer(function (info, accept, deny) {
     console.log('socks5 open ' + info.dstAddr + ':' + info.dstPort);

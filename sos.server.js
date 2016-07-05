@@ -15,10 +15,10 @@ var server = http.createServer(function (req, res) {
 
 server.listen(parseInt(process.argv[2], 10));
 
+var netsock = {};
+
 io(server).on('connect', function (isocket) {
     console.log('socket.io connect ' + isocket.conn.remoteAddress);
-
-    var netsock = {};
 
     isocket.on('open', function (data) {
         console.log('socks5 open ' + data.host + ':' + data.port);
