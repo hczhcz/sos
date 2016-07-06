@@ -40,16 +40,12 @@ server.on('connection', function (wsocket) {
                 wsocket.send(data, {binary: true, compress: true});
             });
 
-            nsocket.on('end', function () {
-                wsocket.close();
+            nsocket.on('close', function () {
+                // wsocket.close();
             });
 
             wsocket.onmessage = function (message) {
                 nsocket.write(message.data);
-            };
-
-            wsocket.onclose = function () {
-                nsocket.end();
             };
         };
     });

@@ -2,6 +2,7 @@
 
 var domain = require('domain');
 var socks = require('socksv5');
+var ws = require('ws');
 
 process.on('uncaughtException', function (err) {
     console.log(err.stack);
@@ -39,16 +40,12 @@ var server = socks.createServer(function (info, accept, deny) {
                 wsocket.send(data, {binary: true, compress: true});
             });
 
-            nsocket.on('end', function () {
+            nsocket.on('close', function () {
                 wsocket.close();
             });
 
             wsocket.onmessage = function (message) {
                 nsocket.write(message.data);
-            };
-
-            wsocket.onclose = function () {
-                nsocket.end();
             };
         };
     });
