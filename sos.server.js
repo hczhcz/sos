@@ -41,7 +41,7 @@ server.on('connection', function (wsocket) {
             });
 
             nsocket.on('close', function () {
-                // wsocket.close();
+                d.dispose();
             });
 
             wsocket.onmessage = function (message) {

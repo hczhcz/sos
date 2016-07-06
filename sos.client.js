@@ -41,7 +41,7 @@ var server = socks.createServer(function (info, accept, deny) {
             });
 
             nsocket.on('close', function () {
-                wsocket.close();
+                d.dispose();
             });
 
             wsocket.onmessage = function (message) {
