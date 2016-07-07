@@ -3,10 +3,20 @@
 var domain = require('domain');
 var socks = require('socksv5');
 var ws = require('ws');
+var url = require('url');
+var proxy = require('https-proxy-agent');
 
 process.on('uncaughtException', function (err) {
     console.log(err.stack);
 });
+
+var agentUrl = process.argv[4] ? url.parse(process.argv[4]) : {};
+var agent = process.argv[4] ? new proxy({
+    hostname: agentUrl.hostname,
+    port: agentUrl.port,
+    auth: agentUrl.auth,
+    secureEndpoint: false,
+}) : undefined;
 
 var server = socks.createServer(function (info, accept, deny) {
     if (
@@ -26,7 +36,9 @@ var server = socks.createServer(function (info, accept, deny) {
     });
 
     d.run(function () {
-        var wsocket = new ws(process.argv[3]);
+        var wsocket = new ws(process.argv[3], {
+            agent: agent,
+        });
 
         wsocket.onopen = function () {
             wsocket.send(JSON.stringify({
